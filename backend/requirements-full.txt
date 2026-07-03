@@ -1,0 +1,20 @@
+# Med-Assist Backend - Full Dependencies
+# Install core first: pip install -r requirements.txt
+# Then full: pip install -r requirements-full.txt
+
+# Heavy RAG deps (sentence-transformers pulls torch ~2GB)
+chromadb>=0.6.0
+sentence-transformers>=3.3.0
+
+# GPTCache (needs onnxruntime)
+gptcache>=0.1.44
+
+# Observability
+langfuse>=2.57.0
+
+# Safety (pulls litellm ~16MB)
+guardrails-ai>=0.5.0
+
+# Evaluation
+ragas>=0.2.0
+datasets>=3.2.0

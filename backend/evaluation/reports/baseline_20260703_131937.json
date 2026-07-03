@@ -1,0 +1,11 @@
+{
+  "timestamp": "2026-07-03T13:19:37.124525",
+  "engine": "simple",
+  "test_cases": 5,
+  "expanded_queries": 30,
+  "scores": {
+    "faithfulness": 0.0,
+    "context_relevancy": 0.0,
+    "answer_relevancy": 0.0
+  }
+}
