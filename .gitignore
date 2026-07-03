@@ -23,8 +23,10 @@ dist/
 Thumbs.db
 
 # Data (generated at runtime)
+backend/data/
 data/chroma/
 data/med_assist.db
+*.db
 
 # Build
 frontend/dist/

@@ -411,6 +411,85 @@ async def list_tools():
     }
 
 
+# ── IOBS 兼容 API（供 iobs-unified-app 3D 可视化前端使用）──
+from tools.surgical_device import (
+    _device_state, BED_JOINTS, CARM_JOINTS, BED_PRESETS,
+    get_device_state as _get_dev_state, move_bed_joint as _move_bed,
+    move_carm_joint as _move_carm, apply_bed_preset as _apply_preset,
+    set_carm_mode as _set_mode, emergency_stop as _estop,
+    reset_emergency as _reset_estop,
+)
+
+
+@app.get("/iobs-api/health")
+async def iobs_health():
+    return {"ok": True}
+
+
+@app.get("/iobs-api/get_pos")
+async def iobs_get_pos(version: str = "1.0"):
+    bed = _device_state["bed"]
+    carm = _device_state["cArm"]
+    return {
+        "version": version,
+        "error": "",
+        "pos": {
+            "surgical_bed": {
+                "position": [0, 0, 0], "rotation": [0, 0, 0],
+                "joints": {k: v for k, v in bed.items()},
+                "stateName": "", "progress": 0, "device": "surgical_bed", "error": "",
+            },
+            "c_arm": {
+                "position": [0, 0, 0], "rotation": [0, 0, 0],
+                "joints": {k: v for k, v in carm.items()},
+                "stateName": "", "progress": 0, "device": "c_arm", "error": "",
+            },
+        },
+    }
+
+
+@app.get("/iobs-api/get_status")
+async def iobs_get_status(version: str = "1.0"):
+    return {"status": {pid: {"name": p["name"], "state": p["state"]} for pid, p in BED_PRESETS.items()}}
+
+
+@app.get("/iobs-api/get_c_arm_mode")
+async def iobs_get_carm_mode(version: str = "1.0"):
+    return {"mode": _device_state["cArmMode"], "auto": 0}
+
+
+@app.get("/iobs-api/set_joint_move")
+async def iobs_set_joint(version: str = "1.0", device: str = "", joint: str = "", speed: float = 5.0,
+                         type: str = "target", value: float = 0.0):
+    if _device_state["emergencyStopped"]:
+        return {"ok": False, "error": "Emergency stopped"}
+    if device == "surgical_bed":
+        args = {"joint": joint, "target_value": value} if type == "target" else {"joint": joint, "delta": value}
+        return await _move_bed(args)
+    elif device == "c_arm":
+        args = {"joint": joint, "target_value": value} if type == "target" else {"joint": joint, "delta": value}
+        return await _move_carm(args)
+    return {"ok": False, "error": f"Unknown device: {device}"}
+
+
+@app.get("/iobs-api/set_preset")
+async def iobs_set_preset(version: str = "1.0", preset_id: str = ""):
+    return await _apply_preset({"preset_id": preset_id})
+
+
+@app.get("/iobs-api/set_c_arm_mode")
+async def iobs_set_carm(version: str = "1.0", mode: int = 0):
+    return await _set_mode({"mode": mode})
+
+
+@app.post("/iobs-api/set_stop")
+async def iobs_set_stop(version: str = "1.0", action: str = "stop"):
+    if action == "stop":
+        return await _estop()
+    else:
+        return await _reset_estop()
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

@@ -21,11 +21,19 @@ if errorlevel 1 (
   exit /b 1
 )
 
-echo [1/2] Starting backend (port 8000)...
+echo [1/3] Starting backend + Agent (port 8000)...
 cd /d "%~dp0backend"
 start "Med-Backend" cmd /c "cd /d %~dp0backend && python -m uvicorn main:app --port 8000 --reload"
 
-echo [2/2] Starting frontend (port 5173)...
+echo [2/3] Starting 3D Viewer (port 3001)...
+cd /d "%~dp0..\iobs-unified-app"
+if not exist "node_modules\" (
+    echo       npm install ...
+    call npm install
+)
+start "Med-3D" cmd /c "cd /d %~dp0..\iobs-unified-app && npm run dev"
+
+echo [3/3] Starting Chat UI (port 5173)...
 cd /d "%~dp0frontend"
 if not exist "node_modules\" (
     echo       npm install ...
@@ -34,9 +42,10 @@ if not exist "node_modules\" (
 
 echo.
 echo -----------------------------------------------
-echo   Frontend : http://localhost:5173
-echo   Backend  : http://localhost:8000
-echo   API Docs : http://localhost:8000/docs
+echo   3D Viewer : http://localhost:3001
+echo   Chat UI   : http://localhost:5173
+echo   Backend   : http://localhost:8000
+echo   API Docs  : http://localhost:8000/docs
 echo -----------------------------------------------
 echo.
 
