@@ -1,6 +1,10 @@
 @echo off
 title Med-Assist
-cd /d "%~dp0"
+
+set ROOT=D:\compilation tool\Yiming\operating table
+set BACKEND=%ROOT%\med-assist\backend
+set FRONTEND=%ROOT%\med-assist\frontend
+set VIEWER=%ROOT%\iobs-unified-app
 
 echo ================================================
 echo   Med-Assist - Medical Device AI Assistant
@@ -22,19 +26,18 @@ if errorlevel 1 (
 )
 
 echo [1/3] Starting backend + Agent (port 8000)...
-cd /d "%~dp0backend"
-start "Med-Backend" cmd /c "cd /d %~dp0backend && python -m uvicorn main:app --port 8000 --reload"
+start "Med-Backend" cmd /c "cd /d %BACKEND% && python -m uvicorn main:app --port 8000 --reload"
 
 echo [2/3] Starting 3D Viewer (port 3001)...
-cd /d "%~dp0..\iobs-unified-app"
+cd /d "%VIEWER%"
 if not exist "node_modules\" (
     echo       npm install ...
     call npm install
 )
-start "Med-3D" cmd /c "cd /d %~dp0..\iobs-unified-app && npm run dev"
+start "Med-3D" cmd /c "cd /d %VIEWER% && npm run dev"
 
 echo [3/3] Starting Chat UI (port 5173)...
-cd /d "%~dp0frontend"
+cd /d "%FRONTEND%"
 if not exist "node_modules\" (
     echo       npm install ...
     call npm install
